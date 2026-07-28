@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>日常工作台 · 我的成长管家</title>
+<style>
+  :root{
+    --bg:#fff0f7;
+    --bg2:#ffe3f3;
+    --panel:#ffffff;
+    --ink:#5a2746;
+    --muted:#b385a3;
+    --line:#ffe1ef;
+    --brand:#ff5fa2;
+    --brand-2:#ff8fc7;
+    --brand-soft:#ffe7f3;
+    --accent:#c86bff;
+    --ok:#00c2a8;
+    --warn:#f6b73c;
+    --shadow:0 8px 28px rgba(255,95,162,.12);
+    --radius:16px;
+    --side-w:236px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",
+      "PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    background:linear-gradient(160deg,#fff0f7 0%,#ffe3f3 45%,#f3e6ff 100%);
+    background-attachment:fixed;
+    color:var(--ink);font-size:14px;line-height:1.5;
+    overflow:hidden;
+  }
+  /* ===== 布局 ===== */
+  .app{display:flex;height:100vh;width:100vw;}
+  /* 左侧工作台 */
+  .sidebar{
+    width:var(--side-w);flex:0 0 var(--side-w);
+    background:linear-gradient(180deg,#ff6fb5,#c86bff);
+    color:#fff;display:flex;flex-direction:column;
+    padding:18px 14px;gap:14px;overflow-y:auto;
+  }
+  .brand{display:flex;align-items:center;gap:10px;padding:4px 6px 10px;}
+  .brand .logo{
+    width:36px;height:36px;border-radius:10px;
+    background:linear-gradient(135deg,var(--brand),#a29bfe);
+    display:flex;align-items:center;justify-content:center;font-size:18px;
+  }
+  .brand h1{font-size:15px;margin:0;color:#fff;font-weight:600;}
+  .brand p{font-size:11px;margin:2px 0 0;color:rgba(255,255,255,.8);}
+  .assistant-card{
+    background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);
+    border-radius:14px;padding:12px;
+  }
+  .assistant-card .ahead{display:flex;align-items:center;gap:8px;font-weight:600;color:#fff;font-size:13px;}
+  .assistant-card .ahead .dot{width:8px;height:8px;border-radius:50%;background:#ffd6ec;box-shadow:0 0 0 3px rgba(255,214,236,.35);}
+  .assistant-card .msg{font-size:12px;color:rgba(255,255,255,.92);margin:8px 0 10px;min-height:34px;}
+  .assistant-card .msg b{color:#fff;}
+  .mini-progress{height:6px;border-radius:6px;background:rgba(255,255,255,.3);overflow:hidden;}
+  .mini-progress > i{display:block;height:100%;background:linear-gradient(90deg,#fff,#ffd6ec);width:0;transition:width .4s;}
+  .mini-progress-label{font-size:11px;color:rgba(255,255,255,.9);margin-top:6px;display:flex;justify-content:space-between;}
+  .nav{display:flex;flex-direction:column;gap:4px;margin-top:2px;}
+  .nav button{
+    display:flex;align-items:center;gap:10px;width:100%;
+    background:transparent;border:0;color:rgba(255,255,255,.85);
+    padding:10px 12px;border-radius:10px;font-size:13px;cursor:pointer;text-align:left;
+    transition:.15s;
+  }
+  .nav button .ic{width:20px;text-align:center;}
+  .nav button:hover{background:rgba(255,255,255,.22);color:#fff;}
+  .nav button.active{background:rgba(255,255,255,.95);color:var(--brand);font-weight:600;box-shadow:0 4px 14px rgba(255,95,162,.35);}
+  .side-foot{margin-top:auto;font-size:11px;color:rgba(255,255,255,.75);padding:6px;text-align:center;}
+
+  /* 右侧内容区 */
+  .main{flex:1;height:100vh;overflow-y:auto;padding:18px 20px 40px;position:relative;}
+  .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:12px;}
+  .topbar .title h2{margin:0;font-size:20px;font-weight:700;background:linear-gradient(135deg,var(--brand),var(--accent));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+  .topbar .title .date{color:var(--muted);font-size:12px;margin-top:2px;}
+  .topbar .actions{display:flex;gap:8px;}
+  .btn{
+    border:0;border-radius:10px;padding:9px 14px;font-size:13px;cursor:pointer;
+    background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;font-weight:600;transition:.15s;
+    box-shadow:0 4px 14px rgba(255,95,162,.35);
+  }
+  .btn:hover{filter:brightness(1.05);}
+  .btn.ghost{background:var(--brand-soft);color:var(--brand);box-shadow:none;font-weight:600;}
+  .btn.line{background:#fff;border:1px solid var(--line);color:var(--brand);}
+  .menu-toggle{display:none;}
+
+  /* 卡片网格 */
+  .grid{display:grid;gap:14px;}
+  .cols-2{grid-template-columns:repeat(2,1fr);}
+  .cols-3{grid-template-columns:repeat(3,1fr);}
+  .cols-4{grid-template-columns:repeat(4,1fr);}
+  .card{background:var(--panel);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;}
+  .card h3{margin:0 0 12px;font-size:15px;display:flex;align-items:center;gap:8px;}
+  .card h3 .tag{font-size:11px;color:var(--muted);font-weight:400;margin-left:auto;}
+
+  /* 概览统计 */
+  .stat{display:flex;flex-direction:column;gap:4px;}
+  .stat .num{font-size:24px;font-weight:700;}
+  .stat .lab{font-size:12px;color:var(--muted);}
+  .stat .bar{height:6px;border-radius:6px;background:var(--line);overflow:hidden;margin-top:4px;}
+  .stat .bar > i{display:block;height:100%;border-radius:6px;}
+
+  /* 任务/清单 */
+  .list{display:flex;flex-direction:column;gap:8px;}
+  .item{display:flex;align-items:flex-start;gap:10px;padding:10px;border:1px solid var(--line);border-radius:12px;background:#fff;}
+  .item .cb{
+    width:20px;height:20px;border-radius:6px;border:2px solid var(--brand);
+    flex:0 0 20px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    margin-top:1px;transition:.15s;
+  }
+  .item.done .cb{background:var(--brand);}
+  .item .cb::after{content:"✓";color:#fff;font-size:13px;opacity:0;}
+  .item.done .cb::after{opacity:1;}
+  .item .body{flex:1;min-width:0;}
+  .item .body .t{font-weight:600;font-size:13.5px;}
+  .item.done .body .t{text-decoration:line-through;color:var(--muted);}
+  .item .body .m{font-size:11.5px;color:var(--muted);margin-top:2px;}
+  .item .del{color:#cbd0d8;cursor:pointer;font-size:16px;line-height:1;padding:2px 4px;border-radius:6px;}
+  .item .del:hover{color:var(--accent);background:#ffe9f6;}
+  .chip{display:inline-block;font-size:10.5px;padding:2px 7px;border-radius:20px;background:var(--brand-soft);color:var(--brand);margin-right:6px;}
+  .chip.green{background:#e8fbf6;color:var(--ok);}
+  .chip.orange{background:#fff3e0;color:#e08e0b;}
+  .add-row{display:flex;gap:8px;margin-top:10px;}
+  .add-row input{flex:1;border:1px solid var(--line);border-radius:10px;padding:9px 11px;font-size:13px;outline:none;}
+  .add-row input:focus{border-color:var(--brand);}
+
+  /* 热点 */
+  .hot{display:flex;gap:12px;padding:12px;border:1px solid var(--line);border-radius:12px;}
+  .hot .thumb{width:64px;height:64px;border-radius:10px;flex:0 0 64px;display:flex;align-items:center;justify-content:center;font-size:26px;background:var(--brand-soft);}
+  .hot.video .thumb{background:linear-gradient(135deg,#ffe1f0,#ffd0e8);}
+  .hot .info{flex:1;min-width:0;}
+  .hot .info .tt{font-weight:600;font-size:13.5px;}
+  .hot .info .ds{font-size:12px;color:var(--muted);margin:3px 0 6px;}
+  .hot .info a{color:var(--brand);font-size:12px;text-decoration:none;font-weight:600;}
+
+  /* 书库 */
+  .cat-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
+  .cat-tabs button{border:1px solid var(--line);background:#fff;border-radius:20px;padding:6px 13px;font-size:12px;cursor:pointer;color:var(--ink);}
+  .cat-tabs button.active{background:var(--brand);color:#fff;border-color:var(--brand);}
+  .book{display:flex;gap:12px;padding:12px;border:1px solid var(--line);border-radius:12px;}
+  .book .cover{width:46px;height:64px;border-radius:8px;flex:0 0 46px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;background:linear-gradient(135deg,var(--brand-2),var(--accent));}
+  .book .meta{flex:1;min-width:0;}
+  .book .meta .bt{font-weight:700;font-size:14px;}
+  .book .meta .ba{font-size:12px;color:var(--muted);margin:2px 0 5px;}
+  .book .meta .bd{font-size:12px;color:#5a6172;}
+
+  /* SOP */
+  .sop-step{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px dashed var(--line);}
+  .sop-step:last-child{border-bottom:0;}
+  .sop-step .n{width:24px;height:24px;border-radius:50%;background:var(--brand-soft);color:var(--brand);font-weight:700;font-size:12px;display:flex;align-items:center;justify-content:center;flex:0 0 24px;}
+  .sop-step .st{flex:1;}
+  .sop-step .st .h{font-weight:600;font-size:13.5px;}
+  .sop-step .st .d{font-size:12px;color:var(--muted);margin-top:2px;}
+  .sop-step .ck{width:20px;height:20px;border-radius:6px;border:2px solid var(--brand);flex:0 0 20px;cursor:pointer;margin-top:2px;}
+  .sop-step.checked .ck{background:var(--brand);position:relative;}
+  .sop-step.checked .ck::after{content:"✓";color:#fff;font-size:13px;position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+  .sop-step.checked .h{text-decoration:line-through;color:var(--muted);}
+
+  .section-title{font-size:16px;font-weight:700;margin:4px 0 12px;display:flex;align-items:center;gap:8px;color:var(--ink);}
+  .section-title .line{width:4px;height:16px;background:linear-gradient(180deg,var(--brand-2),var(--accent));border-radius:4px;}
+  .mt{margin-top:18px;}
+  .empty{color:var(--muted);font-size:12.5px;text-align:center;padding:14px;}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:linear-gradient(135deg,var(--brand),var(--accent));color:#fff;padding:10px 18px;border-radius:12px;font-size:13px;opacity:0;transition:.25s;z-index:99;pointer-events:none;box-shadow:0 8px 24px rgba(255,95,162,.45);}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* 移动端：侧栏变抽屉 */
+  @media(max-width:820px){
+    .sidebar{
+      position:fixed;left:0;top:0;bottom:0;z-index:50;transform:translateX(-100%);
+      transition:transform .25s;box-shadow:0 0 40px rgba(0,0,0,.3);
+    }
+    .sidebar.open{transform:translateX(0);}
+    .menu-toggle{display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:#fff;font-size:18px;cursor:pointer;}
+    .main{padding:14px 14px 40px;}
+    .cols-2,.cols-3,.cols-4{grid-template-columns:1fr;}
+    .mask{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:40;display:none;}
+    .mask.show{display:block;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- 左侧工作台 -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="logo">🌿</div>
+      <div>
+        <h1>日常工作台</h1>
+        <p>我的成长管家</p>
+      </div>
+    </div>
+
+    <div class="assistant-card">
+      <div class="ahead"><span class="dot"></span>线上助理</div>
+      <div class="msg" id="assistantMsg">早上好，今天也要好好照顾自己 💪</div>
+      <div class="mini-progress"><i id="miniBar"></i></div>
+      <div class="mini-progress-label"><span id="miniLabel">今日任务 0/0</span><span id="miniPct">0%</span></div>
+    </div>
+
+    <nav class="nav" id="nav">
+      <button data-view="home" class="active"><span class="ic">🏠</span>工作台首页</button>
+      <button data-view="work"><span class="ic">💼</span>工作记录</button>
+      <button data-view="study"><span class="ic">📚</span>学习记录</button>
+      <button data-view="fitness"><span class="ic">🏃</span>健身记录</button>
+      <button data-view="diet"><span class="ic">🍱</span>日常饮食</button>
+      <button data-view="hot"><span class="ic">🔥</span>女性主义热点</button>
+      <button data-view="books"><span class="ic">📖</span>书库·推荐</button>
+      <button data-view="learn"><span class="ic">🧠</span>学习库</button>
+      <button data-view="sop"><span class="ic">✅</span>标准流程实操</button>
+    </nav>
+
+    <div class="side-foot">数据保存在本机 · 简约不简单</div>
+  </aside>
+  <div class="mask" id="mask"></div>
+
+  <!-- 右侧主区 -->
+  <main class="main" id="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button class="menu-toggle" id="menuToggle">☰</button>
+        <div class="title">
+          <h2 id="viewTitle">工作台首页</h2>
+          <div class="date" id="todayDate"></div>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn ghost" id="refreshHot">↻ 更新今日热点</button>
+      </div>
+    </div>
+
+    <div id="content"></div>
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ 工具 ============ */
+const $ = s=>document.querySelector(s);
+const today = ()=> new Date().toISOString().slice(0,10);
+const store = {
+  get(k,def){try{return JSON.parse(localStorage.getItem('wt_'+k))??def;}catch(e){return def;}},
+  set(k,v){localStorage.setItem('wt_'+k,JSON.stringify(v));}
+};
+let uid=()=>Math.random().toString(36).slice(2,9);
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1600);}
+
+/* ============ 每日助理文案 ============ */
+const greetings=[
+  "早上好，今天也要好好照顾自己 💪",
+  "下午好，记得起身活动一下筋骨 ☕",
+  "晚上好，复盘今天，给自己一个肯定 🌙",
+  "新的一天，先定三个小目标吧 ✨"
+];
+
+/* ============ 数据初始化 ============ */
+// 记录类模块：work/study/fitness/diet
+['work','study','fitness','diet'].forEach(k=>{
+  if(!store.get(k)) store.set(k,[]);
+});
+// 任务
+if(!store.get('tasks')) store.set('tasks',[
+  {id:uid(),t:'完成今日工作主线任务',m:'工作 · 高优先',cat:'work',done:false,date:today()},
+  {id:uid(),t:'阅读《妇女、种族与阶级》30分钟',m:'学习 · 女性主义书单',cat:'study',done:false,date:today()},
+  {id:uid(),t:'30分钟有氧 + 拉伸',m:'健身 · 每日打卡',cat:'fitness',done:false,date:today()},
+  {id:uid(),t:'记录三餐 + 喝水 1.5L',m:'饮食 · 健康习惯',cat:'diet',done:false,date:today()}
+]);
+
+/* ============ 女性主义热点（内置示例，可每日刷新） ============ */
+const HOT_POOL=[
+  {type:'video',icon:'🎬',tt:'上野千鹤子×格非：东亚女性的生存困境',ds:'东京大学名誉教授与作家的对谈，关于婚姻、独立与母职。',url:'https://www.bilibili.com/search?keyword=上野千鹤子'},
+  {type:'article',icon:'📝',tt:'为什么"女子力"是一种温柔的规训？',ds:'从社会性别角色看女性被期待的"柔软、体贴、顾家"。',url:'https://www.thepaper.cn/'},
+  {type:'video',icon:'🎬',tt:'《封建糟粕还是文化符号》两性视角解读',ds:'短视频科普：传统习俗里的性别权力结构。',url:'https://www.douyin.com/search/%E5%A5%B3%E6%80%A7%E4%B8%BB%E4%B9%89'},
+  {type:'article',icon:'📝',tt:'同工同酬差距报告：2025 全球进展',ds:'数据透视女性在职场中的结构性不平等。',url:'https://www.weforum.org/reports/'},
+  {type:'video',icon:'🎬',tt:'独居女性的一天：把自己重新养一遍',ds:'vlog 记录独立生活，温柔而有力。',url:'https://www.xiaohongshu.com/search_result?keyword=独居女性'},
+  {type:'article',icon:'📝',tt:'月经贫困与卫生巾税：被忽视的基本权利',ds:'公共议题科普，理解"身体自主权"。',url:'https://zh.wikipedia.org/wiki/%E6%9C%88%E7%BB%8F%E8%B4%AB%E5%9B%B0'},
+  {type:'video',icon:'🎬',tt:'波伏娃《第二性》核心观点 10 分钟讲透',ds:'女性主义理论入门必看。',url:'https://www.bilibili.com/search?keyword=第二性%20解读'},
+  {type:'article',icon:'📝',tt:'"妈妈岗"是照顾还是新标签？',ds:'弹性就业背后的性别假设讨论。',url:'https://www.thepaper.cn/'}
+];
+function pickHot(n=4){
+  const arr=[...HOT_POOL];
+  for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}
+  return arr.slice(0,n);
+}
+let hotData=store.get('hot');
+let hotDate=store.get('hotDate');
+if(!hotData||hotDate!==today()){hotData=pickHot();store.set('hot',hotData);store.set('hotDate',today());}
+
+/* ============ 书库（知识体系） ============ */
+const BOOKS=[
+  {cat:'理论奠基',t:'第二性',a:'西蒙娜·德·波伏娃',d:'"女人不是天生的，而是被造成的。"女性主义理论的基石。',icon:'📕'},
+  {cat:'理论奠基',t:'厌女',a:'上野千鹤子',d:'剖析父权社会中的厌女机制，犀利直白。',icon:'📗'},
+  {cat:'理论奠基',t:'性别麻烦',a:'朱迪斯·巴特勒',d:'性别表演理论，解构"男/女"二元。',icon:'📘'},
+  {cat:'经济与阶级',t:'妇女、种族与阶级',a:'安吉拉·戴维斯',d:'交叉性视角下的女性解放。',icon:'📙'},
+  {cat:'经济与阶级',t:'隐性基模',a:'玛丽莲·弗伦奇',d:'系统呈现女性在世界范围内的处境。',icon:'📔'},
+  {cat:'身体与权利',t:'身体之重',a:'苏珊·波尔多',d:'身体如何被文化规训。',icon:'🩷'},
+  {cat:'身体与权利',t:'闭经',a:'蔡银娟 等',d:'重新认识女性身体与经期自主。',icon:'💜'},
+  {cat:'独立成长',t:'一间自己的房间',a:'弗吉尼亚·伍尔夫',d:'女性需要经济与精神的空间。',icon:'📒'},
+  {cat:'独立成长',t:'成为波伏娃',a:'凯特·柯克帕特里克',d:'真实而复杂的一位思想家传记。',icon:'📓'},
+  {cat:'亲密关系',t:'爱的艺术',a:'艾里希·弗洛姆',d:'爱是一种能力，而非被动坠入。',icon:'💛'},
+  {cat:'亲密关系',t:'亲密陷阱',a:'Esther Perel',d:'现代关系中的欲望与自由。',icon:'🧡'},
+  {cat:'职场与经济',t:'向前一步',a:'谢丽尔·桑德伯格',d:'女性职场自我突围指南。',icon:'💚'}
+];
+const CATS=['全部',...[...new Set(BOOKS.map(b=>b.cat))]];
+
+/* ============ 学习库 ============ */
+const LEARN=[
+  {t:'交叉性 Intersectionality',d:'种族、阶级、性别等压迫叠加，单一视角无法理解女性处境。',tag:'核心概念'},
+  {t:'父权制 Patriarchy',d:'以男性为中心的等级权力结构，理解它是分析社会的前提。',tag:'核心概念'},
+  {t:'玻璃天花板',d:'职场中看不见的升迁壁垒，常见于高管层。',tag:'职场'},
+  {t:'月经贫困',d:'因经济或文化无法获得卫生用品，是身体自主权的公共议题。',tag:'身体权利'},
+  {t:'情感劳动',d:'维持关系与情绪付出的无偿劳动，常被忽视。',tag:'亲密关系'},
+  {t:'阅读的"三层笔记法"',d:'①摘录金句 ②写自己的故事对照 ③行动改变。把书变成生活。',tag:'方法'},
+  {t:'信息甄别',d:'遇到"女性主义"话题，先问：谁在说？立场？数据来源？',tag:'方法'}
+];
+
+/* ============ SOP 标准流程 ============ */
+const SOPS={
+  work:[
+    {h:'梳理今日目标',d:'列出 3 件最重要的工作，按价值排序。'},
+    {h:'进入深度工作',d:'关通知，单任务 50 分钟，番茄钟循环。'},
+    {h:'中途复盘',d:'每项完成后记录卡点与产出。'},
+    {h:'收尾与明日预告',d:'整理文件，写下明天第一项任务。'}
+  ],
+  study:[
+    {h:'明确今天读什么',d:'选定书+章节，目标 30 分钟起。'},
+    {h:'三层笔记',d:'金句→自我对照→可行动改变。'},
+    {h:'输出一句话',d:'用自己话复述核心观点。'},
+    {h:'关联生活',d:'今天哪里能用上？写下来。'}
+  ],
+  fitness:[
+    {h:'热身 5 分钟',d:'动态拉伸，激活关节。'},
+    {h:'主训练',d:'有氧/力量按计划执行，记录组数。'},
+    {h:'拉伸放松',d:'静态拉伸 8 分钟，降低受伤。'},
+    {h:'补水+记录',d:'喝水，打卡今日项目。'}
+  ],
+  diet:[
+    {h:'记录早餐',d:'拍照/文字，注意蛋白质与蔬果。'},
+    {h:'记录午餐',d:'七分饱，少油少糖。'},
+    {h:'记录晚餐',d:'清淡为主，睡前 3 小时完成。'},
+    {h:'喝水打卡',d:'全天 1.5–2L，分次喝。'}
+  ]
+};
+
+/* ============ 视图渲染 ============ */
+const VIEWS={
+  home:'工作台首页',work:'工作记录',study:'学习记录',
+  fitness:'健身记录',diet:'日常饮食',hot:'女性主义热点',
+  books:'书库 · 书籍推荐',learn:'学习库',sop:'标准流程实操区'
+};
+
+function itemHTML(it,kind){
+  return `<div class="item ${it.done?'done':''}" data-id="${it.id}" data-kind="${kind}">
+    <div class="cb" data-act="toggle"></div>
+    <div class="body"><div class="t">${esc(it.t)}</div>${it.m?`<div class="m">${esc(it.m)}</div>`:''}</div>
+    <div class="del" data-act="del">×</div>
+  </div>`;
+}
+function addRow(kind,ph){
+  return `<div class="add-row">
+    <input id="add-${kind}" placeholder="${ph}">
+    <button class="btn" data-act="add" data-kind="${kind}">添加</button>
+  </div>`;
+}
+function esc(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+/* ---- 首页 ---- */
+function renderHome(){
+  const t=store.get('tasks').filter(x=>x.date===today());
+  const done=t.filter(x=>x.done).length;
+  const pct=t.length?Math.round(done/t.length*100):0;
+  const counts={
+    work:store.get('work').length,study:store.get('study').length,
+    fitness:store.get('fitness').length,diet:store.get('diet').length
+  };
+  const content=`
+  <div class="grid cols-4">
+    ${statCard('今日任务',done+'/'+t.length,pct,'var(--brand)')}
+    ${statCard('工作记录',counts.work,Math.min(counts.work*20,100),'#0984e3')}
+    ${statCard('学习记录',counts.study,Math.min(counts.study*20,100),'#00b894')}
+    ${statCard('健身/饮食',counts.fitness+counts.diet,Math.min((counts.fitness+counts.diet)*15,100),'#e17055')}
+  </div>
+
+  <div class="mt section-title"><span class="line"></span>线上助理 · 今日待办</div>
+  <div class="card">
+    <h3>📋 每日任务 <span class="tag">${done}/${t.length} 已完成</span></h3>
+    <div class="list" id="taskList">
+      ${t.length?t.map(x=>itemHTML(x,'task')).join(''):'<div class="empty">今天还没有任务，添加一下吧</div>'}
+    </div>
+    ${addRow('task','添加今日任务…')}
+  </div>
+
+  <div class="grid cols-2 mt">
+    <div class="card">
+      <h3>🔥 今日女性主义热点 <span class="tag">点击查看</span></h3>
+      <div class="list" id="homeHot">
+        ${hotData.slice(0,3).map(h=>`
+          <div class="hot ${h.type}">
+            <div class="thumb">${h.icon}</div>
+            <div class="info"><div class="tt">${esc(h.tt)}</div>
+            <div class="ds">${esc(h.ds)}</div>
+            <a href="${h.url}" target="_blank" rel="noopener">查看${h.type==='video'?'视频':'图文'} →</a></div>
+          </div>`).join('')}
+      </div>
+      <button class="btn line mt" style="width:100%" data-goto="hot">查看全部热点 + 推荐书单</button>
+    </div>
+    <div class="card">
+      <h3>📖 今日荐书 <span class="tag">女性独立</span></h3>
+      <div class="list">
+        ${BOOKS.slice(0,3).map(b=>`
+          <div class="book"><div class="cover">${b.icon}</div>
+          <div class="meta"><div class="bt">${esc(b.t)}</div>
+          <div class="ba">${esc(b.a)} · ${esc(b.cat)}</div>
+          <div class="bd">${esc(b.d)}</div></div></div>`).join('')}
+      </div>
+      <button class="btn line mt" style="width:100%" data-goto="books">进入知识书库</button>
+    </div>
+  </div>
+
+  <div class="grid cols-2 mt">
+    <div class="card">
+      <h3>🧠 学习库速览</h3>
+      <div class="list">${LEARN.slice(0,4).map(l=>`<div class="item"><div class="body"><div class="t"><span class="chip">${esc(l.tag)}</span>${esc(l.t)}</div><div class="m">${esc(l.d)}</div></div></div>`).join('')}</div>
+      <button class="btn line mt" style="width:100%" data-goto="learn">打开学习库</button>
+    </div>
+    <div class="card">
+      <h3>✅ 标准流程实操区</h3>
+      <div class="list">${['work','study','fitness','diet'].map(k=>`<div class="item"><div class="body"><div class="t">${VIEWS[k]}标准流程</div><div class="m">${SOPS[k].length} 个步骤 · 照做即可</div></div></div>`).join('')}</div>
+      <button class="btn line mt" style="width:100%" data-goto="sop">进入实操区</button>
+    </div>
+  </div>`;
+  $('#content').innerHTML=content;
+  updateMini(done,t.length,pct);
+}
+
+function statCard(lab,num,pct,color){
+  return `<div class="card stat"><div class="num">${num}</div><div class="lab">${lab}</div>
+    <div class="bar"><i style="width:${pct}%;background:${color}"></i></div></div>`;
+}
+
+/* ---- 记录模块通用 ---- */
+function renderRecord(kind){
+  const data=store.get(kind);
+  const phMap={work:'今天完成了什么工作…',study:'今天学了什么…',fitness:'今日训练内容…',diet:'今天吃了什么…'};
+  const tmplMap={
+    work:['重要','常规','会议'],study:['读书','课程','复盘'],
+    fitness:['有氧','力量','拉伸'],diet:['早餐','午餐','晚餐','加餐']
+  };
+  $('#content').innerHTML=`
+    <div class="card">
+      <h3>${VIEWS[kind]} <span class="tag">${today()}</span></h3>
+      <div class="list" id="list-${kind}">
+        ${data.length?data.map(x=>itemHTML(x,kind)).join(''):'<div class="empty">还没有记录，添加第一条吧</div>'}
+      </div>
+      ${addRow(kind,phMap[kind])}
+      <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;">
+        ${tmplMap[kind].map(t=>`<span class="chip">${t}</span>`).join('')}
+      </div>
+    </div>
+    <div class="card mt">
+      <h3>✅ ${VIEWS[kind]}标准流程 <span class="tag">照做</span></h3>
+      <div id="sop-${kind}">${SOPS[kind].map((s,i)=>`
+        <div class="sop-step" data-kind="${kind}" data-i="${i}">
+          <div class="n">${i+1}</div>
+          <div class="st"><div class="h">${esc(s.h)}</div><div class="d">${esc(s.d)}</div></div>
+          <div class="ck"></div>
+        </div>`).join('')}</div>
+    </div>`;
+}
+
+/* ---- 热点 ---- */
+function renderHot(){
+  $('#content').innerHTML=`
+    <div class="card">
+      <h3>🔥 女性主义热点 <span class="tag">每日更新 · ${today()}</span></h3>
+      <div class="list" id="hotList">
+        ${hotData.map(h=>`
+          <div class="hot ${h.type}">
+            <div class="thumb">${h.icon}</div>
+            <div class="info">
+              <div class="tt">${h.type==='video'?'🎬 ':'📝 '}${esc(h.tt)}</div>
+              <div class="ds">${esc(h.ds)}</div>
+              <a href="${h.url}" target="_blank" rel="noopener">查看${h.type==='video'?'视频':'图文'} →</a>
+            </div>
+          </div>`).join('')}
+      </div>
+      <button class="btn ghost mt" id="regenHot" style="width:100%">↻ 换一批今日热点</button>
+    </div>
+    <div class="card mt">
+      <h3>📖 今日书籍推荐 <span class="tag">女性独立</span></h3>
+      <div class="list" id="recBooks">
+        ${[...BOOKS].sort(()=>Math.random()-0.5).slice(0,4).map(b=>`
+          <div class="book"><div class="cover">${b.icon}</div>
+          <div class="meta"><div class="bt">${esc(b.t)}</div>
+          <div class="ba">${esc(b.a)} · ${esc(b.cat)}</div>
+          <div class="bd">${esc(b.d)}</div></div></div>`).join('')}
+      </div>
+    </div>`;
+  $('#regenHot').onclick=()=>{hotData=pickHot();store.set('hot',hotData);store.set('hotDate',today());renderHot();toast('已更新今日热点');};
+}
+
+/* ---- 书库 ---- */
+let curCat='全部';
+function renderBooks(){
+  const list=curCat==='全部'?BOOKS:BOOKS.filter(b=>b.cat===curCat);
+  $('#content').innerHTML=`
+    <div class="card">
+      <h3>📖 知识体系书库 <span class="tag">${BOOKS.length} 本 · 女性独立主题</span></h3>
+      <div class="cat-tabs" id="catTabs">
+        ${CATS.map(c=>`<button class="${c===curCat?'active':''}" data-cat="${c}">${c}</button>`).join('')}
+      </div>
+      <div class="list" id="bookList">
+        ${list.map(b=>`
+          <div class="book"><div class="cover">${b.icon}</div>
+          <div class="meta"><div class="bt">${esc(b.t)}</div>
+          <div class="ba">${esc(b.a)} · <span class="chip">${esc(b.cat)}</span></div>
+          <div class="bd">${esc(b.d)}</div></div></div>`).join('')}
+      </div>
+    </div>`;
+  $('#catTabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;curCat=b.dataset.cat;renderBooks();};
+}
+
+/* ---- 学习库 ---- */
+function renderLearn(){
+  $('#content').innerHTML=`
+    <div class="card">
+      <h3>🧠 学习库 <span class="tag">概念 + 方法</span></h3>
+      <div class="list">
+        ${LEARN.map(l=>`
+          <div class="item"><div class="body">
+            <div class="t"><span class="chip green">${esc(l.tag)}</span>${esc(l.t)}</div>
+            <div class="m">${esc(l.d)}</div></div></div>`).join('')}
+      </div>
+    </div>
+    <div class="card mt">
+      <h3>📚 阅读方法 · 三层笔记</h3>
+      <div class="list">
+        <div class="sop-step checked"><div class="n">1</div><div class="st"><div class="h">摘录金句</div><div class="d">遇到击中你的句子，先原样记下来。</div></div><div class="ck"></div></div>
+        <div class="sop-step"><div class="n">2</div><div class="st"><div class="h">自我对照</div><div class="d">这句话和我自己的经历有什么关系？</div></div><div class="ck"></div></div>
+        <div class="sop-step"><div class="n">3</div><div class="st"><div class="h">行动改变</div><div class="d">今天我能做的一个小改变是什么？</div></div><div class="ck"></div></div>
+      </div>
+    </div>`;
+}
+
+/* ---- SOP 实操区 ---- */
+let curSop='work';
+function renderSop(){
+  const ks=Object.keys(SOPS);
+  $('#content').innerHTML=`
+    <div class="card">
+      <h3>✅ 标准工作流程实操区</h3>
+      <div class="cat-tabs" id="sopTabs">
+        ${ks.map(k=>`<button class="${k===curSop?'active':''}" data-k="${k}">${VIEWS[k]}</button>`).join('')}
+      </div>
+      <div class="list" id="sopBody">
+        ${SOPS[curSop].map((s,i)=>`
+          <div class="sop-step" data-kind="${curSop}" data-i="${i}">
+            <div class="n">${i+1}</div>
+            <div class="st"><div class="h">${esc(s.h)}</div><div class="d">${esc(s.d)}</div></div>
+            <div class="ck"></div>
+          </div>`).join('')}
+      </div>
+      <button class="btn ghost mt" id="resetSop" style="width:100%">重置本流程勾选</button>
+    </div>`;
+  $('#sopTabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;curSop=b.dataset.k;renderSop();};
+  $('#resetSop').onclick=()=>{document.querySelectorAll('#sopBody .sop-step').forEach(x=>x.classList.remove('checked'));toast('已重置');};
+}
+
+/* ============ 交互 ============ */
+function updateMini(done,total,pct){
+  $('#miniBar').style.width=(pct||0)+'%';
+  $('#miniLabel').textContent=`今日任务 ${done}/${total}`;
+  $('#miniPct').textContent=(pct||0)+'%';
+  const h=new Date().getHours();
+  $('#assistantMsg').textContent = h<11?greetings[0]:h<18?greetings[1]:greetings[2];
+}
+
+function switchView(v){
+  $('#viewTitle').textContent=VIEWS[v];
+  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
+  if(v==='home')renderHome();
+  else if(['work','study','fitness','diet'].includes(v))renderRecord(v);
+  else if(v==='hot')renderHot();
+  else if(v==='books')renderBooks();
+  else if(v==='learn')renderLearn();
+  else if(v==='sop')renderSop();
+  $('#main').scrollTop=0;
+  closeSidebar();
+}
+
+document.addEventListener('click',e=>{
+  // 导航
+  const nav=e.target.closest('#nav button');
+  if(nav){switchView(nav.dataset.view);return;}
+  // 跳转按钮
+  const go=e.target.closest('[data-goto]');
+  if(go){switchView(go.dataset.goto);return;}
+  // 列表项操作
+  const item=e.target.closest('.item');
+  if(item){
+    const act=e.target.dataset.act;
+    const kind=item.dataset.kind;
+    const id=item.dataset.id;
+    if(act==='toggle'){toggleDone(kind,id);}
+    else if(act==='del'){delItem(kind,id);}
+    return;
+  }
+  // SOP 勾选
+  const step=e.target.closest('.sop-step');
+  if(step){step.classList.toggle('checked');return;}
+});
+
+function toggleDone(kind,id){
+  let data=store.get(kind);
+  const it=data.find(x=>x.id===id);
+  if(it){it.done=!it.done;store.set(kind,data);}
+  if(kind==='task'){const t=store.get('tasks').filter(x=>x.date===today());updateMini(t.filter(x=>x.done).length,t.length);}
+  rerenderCurrent();
+}
+function delItem(kind,id){
+  let data=store.get(kind).filter(x=>x.id!==id);
+  store.set(kind,data);
+  rerenderCurrent();
+  toast('已删除');
+}
+function rerenderCurrent(){
+  const v=document.querySelector('#nav button.active').dataset.view;
+  switchView(v);
+}
+
+// 添加项（事件委托到 content 的输入回车/按钮）
+document.addEventListener('click',e=>{
+  if(e.target.dataset.act==='add'){
+    const kind=e.target.dataset.kind;
+    const inp=$('#add-'+kind);
+    const v=inp.value.trim();
+    if(!v){toast('写点内容吧');return;}
+    let data=store.get(kind);
+    if(kind==='task')data.push({id:uid(),t:v,m:'自定义',cat:'task',done:false,date:today()});
+    else data.push({id:uid(),t:v,done:false});
+    store.set(kind,data);
+    rerenderCurrent();
+    toast('已添加');
+  }
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&e.target.id&&e.target.id.startsWith('add-')){
+    const btn=document.querySelector(`[data-act="add"][data-kind="${e.target.id.replace('add-','')}"]`);
+    if(btn)btn.click();
+  }
+});
+
+/* 侧栏抽屉（移动端） */
+function openSidebar(){$('#sidebar').classList.add('open');$('#mask').classList.add('show');}
+function closeSidebar(){$('#sidebar').classList.remove('open');$('#mask').classList.remove('show');}
+$('#menuToggle').onclick=openSidebar;
+$('#mask').onclick=closeSidebar;
+
+/* 顶部刷新热点 */
+$('#refreshHot').onclick=()=>{hotData=pickHot();store.set('hot',hotData);store.set('hotDate',today());if(document.querySelector('#nav button.active').dataset.view==='home')renderHome();if(document.querySelector('#nav button.active').dataset.view==='hot')renderHot();toast('今日热点已更新');};
+
+/* 启动 */
+$('#todayDate').textContent=new Date().toLocaleDateString('zh-CN',{year:'numeric',month:'long',day:'numeric',weekday:'long'});
+switchView('home');
+</script>
+</body>
+</html>
