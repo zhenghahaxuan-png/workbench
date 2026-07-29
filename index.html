@@ -6,31 +6,42 @@
 <title>日常工作台 · 我的成长管家</title>
 <style>
   :root{
-    --bg:#fff0f7;
-    --bg2:#ffe3f3;
+    --bg:#fff2f8;
+    --bg2:#ffe0f1;
     --panel:#ffffff;
-    --ink:#5a2746;
-    --muted:#b385a3;
-    --line:#ffe1ef;
-    --brand:#ff5fa2;
-    --brand-2:#ff8fc7;
-    --brand-soft:#ffe7f3;
-    --accent:#c86bff;
-    --ok:#00c2a8;
-    --warn:#f6b73c;
-    --shadow:0 8px 28px rgba(255,95,162,.12);
-    --radius:16px;
+    --ink:#7a2e57;
+    --muted:#c08aa8;
+    --line:#ffd9ec;
+    --brand:#ff6fb5;
+    --brand-2:#ff9ed1;
+    --brand-soft:#ffe9f4;
+    --accent:#c98bff;
+    --ok:#2ec9b0;
+    --warn:#ffb347;
+    --shadow:0 10px 30px rgba(255,111,181,.18);
+    --radius:22px;
+    --font-cute:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",
+      "Nunito","Quicksand","Comic Sans MS",-apple-system,sans-serif;
+  }
     --side-w:236px;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   html,body{margin:0;padding:0;height:100%;}
   body{
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",
-      "PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
-    background:linear-gradient(160deg,#fff0f7 0%,#ffe3f3 45%,#f3e6ff 100%);
+    font-family:var(--font-cute);
+    background:linear-gradient(160deg,#fff2f8 0%,#ffe0f1 45%,#f6e6ff 100%);
     background-attachment:fixed;
     color:var(--ink);font-size:14px;line-height:1.5;
     overflow:hidden;
+  }
+  /* 漂浮爱心背景 */
+  .hearts{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+  .hearts span{position:absolute;bottom:-40px;font-size:20px;opacity:.0;animation:floatUp linear infinite;}
+  @keyframes floatUp{
+    0%{transform:translateY(0) rotate(0);opacity:0;}
+    10%{opacity:.7;}
+    90%{opacity:.5;}
+    100%{transform:translateY(-110vh) rotate(360deg);opacity:0;}
   }
   /* ===== 布局 ===== */
   .app{display:flex;height:100vh;width:100vw;}
@@ -180,14 +191,57 @@
     .mask{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:40;display:none;}
     .mask.show{display:block;}
   }
+
+  /* ===== 可爱动画主题 ===== */
+  /* 卡片弹入 */
+  @keyframes popIn{0%{opacity:0;transform:translateY(14px) scale(.96);}100%{opacity:1;transform:translateY(0) scale(1);}}
+  .card,.stat{padding:16px;animation:popIn .45s cubic-bezier(.34,1.56,.64,1) both;}
+  #content .card:nth-child(1){animation-delay:.02s;}
+  #content .card:nth-child(2){animation-delay:.08s;}
+  #content .card:nth-child(3){animation-delay:.14s;}
+  #content .card:nth-child(4){animation-delay:.2s;}
+  /* 按钮按压 + 悬浮浮动 */
+  .btn{transition:transform .12s, filter .15s, box-shadow .15s;}
+  .btn:hover{transform:translateY(-2px);filter:brightness(1.05);}
+  .btn:active{transform:translateY(1px) scale(.97);}
+  .nav button{transition:transform .15s, background .15s, color .15s;}
+  .nav button:active{transform:scale(.96);}
+  .book,.item,.hot{transition:transform .15s, box-shadow .15s;}
+  .book:hover,.item:hover,.hot:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(255,111,181,.22);}
+  /* logo 心跳 */
+  @keyframes beat{0%,100%{transform:scale(1);}25%{transform:scale(1.12);}40%{transform:scale(.96);}60%{transform:scale(1.08);}}
+  .brand .logo{animation:beat 1.8s ease-in-out infinite;box-shadow:0 6px 16px rgba(255,111,181,.4);}
+  /* 标题可爱化 */
+  h1,h2,h3,.bt,.num{font-weight:800;letter-spacing:.3px;}
+  .chip{border-radius:20px;font-weight:700;}
+  .cat-tabs button{border-radius:20px;font-weight:700;transition:transform .12s;}
+  .cat-tabs button:active{transform:scale(.94);}
+  /* 复选框打勾弹跳 */
+  @keyframes tick{0%{transform:scale(0);}60%{transform:scale(1.25);}100%{transform:scale(1);}}
+  .item.done .cb::after{animation:tick .3s ease;}
+  .sop-step.checked .ck::after{animation:tick .3s ease;}
+  /* 完成洒心 */
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,111,181,.35);}100%{box-shadow:0 0 0 12px rgba(255,111,181,0);}}
+  .item.done .cb{animation:pulse .5s;}
+  /* 进度条流光 */
+  .mini-progress > i{background:linear-gradient(90deg,#ff9ed1,#ff6fb5,#c98bff);background-size:200% 100%;animation:flow 3s linear infinite;}
+  @keyframes flow{0%{background-position:0 0;}100%{background-position:200% 0;}}
+  /* 助理卡片轻微浮动 */
+  .assistant-card{animation:floaty 4s ease-in-out infinite;}
+  @keyframes floaty{0%,100%{transform:translateY(0);}50%{transform:translateY(-4px);}}
+  /* 减少动效偏好 */
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none!important;transition:none!important;}
+  }
 </style>
 </head>
 <body>
+<div class="hearts" id="hearts"></div>
 <div class="app">
   <!-- 左侧工作台 -->
   <aside class="sidebar" id="sidebar">
     <div class="brand">
-      <div class="logo">🌿</div>
+      <div class="logo">🌸</div>
       <div>
         <h1>日常工作台</h1>
         <p>我的成长管家</p>
@@ -673,6 +727,22 @@ $('#refreshHot').onclick=()=>{hotData=pickHot();store.set('hot',hotData);store.s
 
 /* 启动 */
 $('#todayDate').textContent=new Date().toLocaleDateString('zh-CN',{year:'numeric',month:'long',day:'numeric',weekday:'long'});
+
+/* 漂浮爱心背景 */
+(function(){
+  const box=$('#hearts');if(!box)return;
+  const icons=['💖','🌸','💕','🩷','✨','🎀'];
+  for(let i=0;i<14;i++){
+    const s=document.createElement('span');
+    s.textContent=icons[Math.floor(Math.random()*icons.length)];
+    s.style.left=Math.random()*100+'%';
+    s.style.fontSize=(14+Math.random()*18)+'px';
+    s.style.animationDuration=(9+Math.random()*10)+'s';
+    s.style.animationDelay=(-Math.random()*15)+'s';
+    box.appendChild(s);
+  }
+})();
+
 switchView('home');
 </script>
 </body>
