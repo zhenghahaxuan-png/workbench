@@ -291,18 +291,18 @@ if(!hotData||hotDate!==today()){hotData=pickHot();store.set('hot',hotData);store
 
 /* ============ 书库（知识体系） ============ */
 const BOOKS=[
-  {cat:'理论奠基',t:'第二性',a:'西蒙娜·德·波伏娃',d:'"女人不是天生的，而是被造成的。"女性主义理论的基石。',icon:'📕'},
-  {cat:'理论奠基',t:'厌女',a:'上野千鹤子',d:'剖析父权社会中的厌女机制，犀利直白。',icon:'📗'},
-  {cat:'理论奠基',t:'性别麻烦',a:'朱迪斯·巴特勒',d:'性别表演理论，解构"男/女"二元。',icon:'📘'},
-  {cat:'经济与阶级',t:'妇女、种族与阶级',a:'安吉拉·戴维斯',d:'交叉性视角下的女性解放。',icon:'📙'},
-  {cat:'经济与阶级',t:'隐性基模',a:'玛丽莲·弗伦奇',d:'系统呈现女性在世界范围内的处境。',icon:'📔'},
-  {cat:'身体与权利',t:'身体之重',a:'苏珊·波尔多',d:'身体如何被文化规训。',icon:'🩷'},
-  {cat:'身体与权利',t:'闭经',a:'蔡银娟 等',d:'重新认识女性身体与经期自主。',icon:'💜'},
-  {cat:'独立成长',t:'一间自己的房间',a:'弗吉尼亚·伍尔夫',d:'女性需要经济与精神的空间。',icon:'📒'},
-  {cat:'独立成长',t:'成为波伏娃',a:'凯特·柯克帕特里克',d:'真实而复杂的一位思想家传记。',icon:'📓'},
-  {cat:'亲密关系',t:'爱的艺术',a:'艾里希·弗洛姆',d:'爱是一种能力，而非被动坠入。',icon:'💛'},
-  {cat:'亲密关系',t:'亲密陷阱',a:'Esther Perel',d:'现代关系中的欲望与自由。',icon:'🧡'},
-  {cat:'职场与经济',t:'向前一步',a:'谢丽尔·桑德伯格',d:'女性职场自我突围指南。',icon:'💚'}
+  {cat:'理论奠基',t:'第二性',a:'西蒙娜·德·波伏娃',d:'"女人不是天生的，而是被造成的。"女性主义理论的基石。',icon:'📕',url:'https://weread.qq.com/web/search/books?keyword='+encodeURIComponent('第二性')},
+  {cat:'理论奠基',t:'厌女',a:'上野千鹤子',d:'剖析父权社会中的厌女机制，犀利直白。',icon:'📗',url:'https://weread.qq.com/web/search/books?keyword='+encodeURIComponent('厌女')},
+  {cat:'理论奠基',t:'性别麻烦',a:'朱迪斯·巴特勒',d:'性别表演理论，解构"男/女"二元。',icon:'📘',url:'https://weread.qq.com/web/search/books?keyword='+encodeURIComponent('性别麻烦')},
+  {cat:'经济与阶级',t:'妇女、种族与阶级',a:'安吉拉·戴维斯',d:'交叉性视角下的女性解放。',icon:'📙',url:'https://weread.qq.com/web/search/books?keyword='+encodeURIComponent('妇女种族与阶级')},
+  {cat:'经济与阶级',t:'隐性基模',a:'玛丽莲·弗伦奇',d:'系统呈现女性在世界范围内的处境。',icon:'📔',url:'https://weread.qq.com/web/search/books?keyword='+encodeURIComponent('隐性基模')},
+  {cat:'身体与权利',t:'身体之重',a:'苏珊·波尔多',d:'身体如何被文化规训。',icon:'🩷',url:'https://weread.qq.com/web/search/books?keyword='+encodeURIComponent('身体之重')},
+  {cat:'身体与权利',t:'闭经',a:'蔡银娟 等',d:'重新认识女性身体与经期自主。',icon:'💜',url:'https://weread.qq.com/web/search/books?keyword='+encodeURIComponent('闭经')},
+  {cat:'独立成长',t:'一间自己的房间',a:'弗吉尼亚·伍尔夫',d:'女性需要经济与精神的空间。',icon:'📒',url:'https://weread.qq.com/web/search/books?keyword='+encodeURIComponent('一间自己的房间')},
+  {cat:'独立成长',t:'成为波伏娃',a:'凯特·柯克帕特里克',d:'真实而复杂的一位思想家传记。',icon:'📓',url:'https://weread.qq.com/web/search/books?keyword='+encodeURIComponent('成为波伏娃')},
+  {cat:'亲密关系',t:'爱的艺术',a:'艾里希·弗洛姆',d:'爱是一种能力，而非被动坠入。',icon:'💛',url:'https://weread.qq.com/web/search/books?keyword='+encodeURIComponent('爱的艺术')},
+  {cat:'亲密关系',t:'亲密陷阱',a:'Esther Perel',d:'现代关系中的欲望与自由。',icon:'🧡',url:'https://weread.qq.com/web/search/books?keyword='+encodeURIComponent('亲密陷阱')},
+  {cat:'职场与经济',t:'向前一步',a:'谢丽尔·桑德伯格',d:'女性职场自我突围指南。',icon:'💚',url:'https://weread.qq.com/web/search/books?keyword='+encodeURIComponent('向前一步')}
 ];
 const CATS=['全部',...[...new Set(BOOKS.map(b=>b.cat))]];
 
@@ -408,13 +408,16 @@ function renderHome(){
       <button class="btn line mt" style="width:100%" data-goto="hot">查看全部热点 + 推荐书单</button>
     </div>
     <div class="card">
-      <h3>📖 今日荐书 <span class="tag">女性独立</span></h3>
+      <h3>📖 今日荐书 <span class="tag">点击可打开阅读</span></h3>
       <div class="list">
         ${BOOKS.slice(0,3).map(b=>`
-          <div class="book"><div class="cover">${b.icon}</div>
-          <div class="meta"><div class="bt">${esc(b.t)}</div>
-          <div class="ba">${esc(b.a)} · ${esc(b.cat)}</div>
-          <div class="bd">${esc(b.d)}</div></div></div>`).join('')}
+          <a class="book" href="${b.url}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;">
+            <div class="cover">${b.icon}</div>
+            <div class="meta"><div class="bt">${esc(b.t)}</div>
+            <div class="ba">${esc(b.a)} · ${esc(b.cat)}</div>
+            <div class="bd">${esc(b.d)}</div></div>
+            <div style="align-self:center;color:var(--brand);font-weight:700;font-size:13px;white-space:nowrap;padding-left:6px;">打开 →</div>
+          </a>`).join('')}
       </div>
       <button class="btn line mt" style="width:100%" data-goto="books">进入知识书库</button>
     </div>
@@ -490,13 +493,16 @@ function renderHot(){
       <button class="btn ghost mt" id="regenHot" style="width:100%">↻ 换一批今日热点</button>
     </div>
     <div class="card mt">
-      <h3>📖 今日书籍推荐 <span class="tag">女性独立</span></h3>
+      <h3>📖 今日书籍推荐 <span class="tag">点击可打开阅读</span></h3>
       <div class="list" id="recBooks">
         ${[...BOOKS].sort(()=>Math.random()-0.5).slice(0,4).map(b=>`
-          <div class="book"><div class="cover">${b.icon}</div>
-          <div class="meta"><div class="bt">${esc(b.t)}</div>
-          <div class="ba">${esc(b.a)} · ${esc(b.cat)}</div>
-          <div class="bd">${esc(b.d)}</div></div></div>`).join('')}
+          <a class="book" href="${b.url}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;">
+            <div class="cover">${b.icon}</div>
+            <div class="meta"><div class="bt">${esc(b.t)}</div>
+            <div class="ba">${esc(b.a)} · ${esc(b.cat)}</div>
+            <div class="bd">${esc(b.d)}</div></div>
+            <div style="align-self:center;color:var(--brand);font-weight:700;font-size:13px;white-space:nowrap;padding-left:6px;">打开 →</div>
+          </a>`).join('')}
       </div>
     </div>`;
   $('#regenHot').onclick=()=>{hotData=pickHot();store.set('hot',hotData);store.set('hotDate',today());renderHot();toast('已更新今日热点');};
@@ -514,10 +520,13 @@ function renderBooks(){
       </div>
       <div class="list" id="bookList">
         ${list.map(b=>`
-          <div class="book"><div class="cover">${b.icon}</div>
-          <div class="meta"><div class="bt">${esc(b.t)}</div>
-          <div class="ba">${esc(b.a)} · <span class="chip">${esc(b.cat)}</span></div>
-          <div class="bd">${esc(b.d)}</div></div></div>`).join('')}
+          <a class="book" href="${b.url}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;">
+            <div class="cover">${b.icon}</div>
+            <div class="meta"><div class="bt">${esc(b.t)}</div>
+            <div class="ba">${esc(b.a)} · <span class="chip">${esc(b.cat)}</span></div>
+            <div class="bd">${esc(b.d)}</div></div>
+            <div style="align-self:center;color:var(--brand);font-weight:700;font-size:13px;white-space:nowrap;padding-left:6px;">打开阅读 →</div>
+          </a>`).join('')}
       </div>
     </div>`;
   $('#catTabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;curCat=b.dataset.cat;renderBooks();};
